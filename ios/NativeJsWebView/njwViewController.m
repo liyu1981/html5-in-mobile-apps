@@ -7,6 +7,7 @@
 //
 
 #import "njwViewController.h"
+#import <FBSDKCoreKit/FBSDKAppEvents.h>
 
 @interface njwViewController ()
 
@@ -18,15 +19,17 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
-    self.fNameTextField.delegate = self;
-    self.lNameTextField.delegate = self;
+    //self.fNameTextField.delegate = self;
+    //self.lNameTextField.delegate = self;
     self.webView.delegate = self;
-    NSError *error;
-    NSString *htmlFile = [[NSBundle mainBundle] pathForResource:@"webviewContent" ofType:@"html"];
+    //NSError *error;
+    //NSString *htmlFile = [[NSBundle mainBundle] pathForResource:@"webviewContent" ofType:@"html"];
 
-    NSString *htmlContent = [[NSString alloc] initWithContentsOfFile:htmlFile encoding:NSUTF8StringEncoding error:&error];
-    [self.webView loadHTMLString:htmlContent
-                         baseURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]]];
+    //NSString *htmlContent = [[NSString alloc] initWithContentsOfFile:htmlFile encoding:NSUTF8StringEncoding error:&error];
+    //[self.webView loadHTMLString:htmlContent
+    //                     baseURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] bundlePath]]];
+    [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://104.236.187.180/advancematchingtest/index.html"]]];
+    
 }
 
 - (void)didReceiveMemoryWarning
@@ -44,6 +47,11 @@
     
     
     NSString *requestURLString = [[request URL] absoluteString];
+    
+    if ([FBSDKAppEvents webView:webView shouldStartLoadWithRequest:request navigationType:navigationType]) {
+    } else {
+        return NO;
+    }
     
     if ([requestURLString hasPrefix:@"js-call:"]) {
         

@@ -13,6 +13,16 @@
             margin-top: 15px;
         }
     </style>
+    
+<!-- Facebook Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','//connect.facebook.net/en_US/fbevents.js');
+</script>
+<!-- End Facebook Pixel Code -->
 </head>
 <body>
 <h2>Webview Content</h2>
@@ -30,9 +40,10 @@
 <script>
     (function () {
         var nativeBridge = {
-            invoke: function (commandName, args) {
-                console.log(commandName + ": " + JSON.stringify(args, null, 2));
-                window.location = 'js-call:' + commandName + ':' + encodeURIComponent(JSON.stringify(args));
+            invoke: function (protocal, commandName, args) {
+                console.log(protocal + ": " + commandName + ": " + JSON.stringify(args, null, 2));
+                //window.location = 'fb-ads-sdk-advanced-matching-support:' + commandName + ':' + encodeURIComponent(JSON.stringify(args));
+                window.location = protocal + ':' + commandName + ':' + encodeURIComponent(JSON.stringify(args));
             }
         };
         var updateNativeBtn = document.getElementById('updateNativeBtn');
@@ -41,7 +52,7 @@
         var clickevent = window.ontouchend ? 'touchend' : 'click';
         updateNativeBtn.addEventListener(clickevent, function (evt) {
             evt.preventDefault();
-            nativeBridge.invoke('updateNames', {
+            nativeBridge.invoke('js-call', 'updateNames', {
                 fname: fNameTextField.value,
                 lname: lNameTextField.value
             });
@@ -49,7 +60,15 @@
         window.setNames = function (names) {
             fNameTextField.value = names.fname;
             lNameTextField.value = names.lname;
-        }
+        };
+     
+        // Insert Your Facebook Pixel ID below.
+        window.setPixelAdvancedMatchingInfo = function(data) {
+            fNameTextField.value = data.madid;
+            fbq('init', '1430541610583592', { madid: data.madid});
+            fbq('track', 'PageView');
+        };
+        nativeBridge.invoke('fb-ads-sdk-advanced-matching-support', 'getMAdID', {});
     })();
 </script>
 </html>
