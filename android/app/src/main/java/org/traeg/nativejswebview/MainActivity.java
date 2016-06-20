@@ -1,20 +1,21 @@
 package org.traeg.nativejswebview;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.os.Bundle;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends Activity {
 
@@ -23,17 +24,17 @@ public class MainActivity extends Activity {
 	EditText lnameEditText;
 	Button updateWebViewButton;
 
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-	
+
 		fnameEditText = (EditText)this.findViewById(R.id.fnameEditText);
 		lnameEditText = (EditText)this.findViewById(R.id.lnameEditText);
 		updateWebViewButton = (Button)this.findViewById(R.id.updateWebViewButton);
 		webview = (WebView)this.findViewById(R.id.webView);
-		
+
 		updateWebViewButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -56,58 +57,65 @@ public class MainActivity extends Activity {
     	super.onStart();
     	WebSettings webSettings = webview.getSettings();
     	webSettings.setJavaScriptEnabled(true);
-    	webview.loadUrl("file:///android_asset/webviewContent.html");
-    	
-    	webview.addJavascriptInterface(new WebViewInterface(this), "Android");
-    	
+		webview.loadUrl("http://104.236.187.180/advancematchingtest/index.html");
+    	//webview.loadUrl("file:///android_asset/webviewContent.html");
+
+    	webview.addJavascriptInterface(new WebViewInterface(this, this.webview), "Android");
+
 	}
-	
+
 	public void sendNamesToWebView() {
 		JSONObject namesJson = new JSONObject();
 		try {
 			namesJson.put("fname", fnameEditText.getText().toString());
 			namesJson.put("lname", lnameEditText.getText().toString());
 			webview.loadUrl( "javascript:setNames(" + namesJson.toString() + ")" );
-		} catch (JSONException e) {			
+		} catch (JSONException e) {
 			Log.e(getPackageName(), "Failed to create JSON object for web view");
 		}
 	}
 
 	public class WebViewInterface {
 	    Context mContext;
+		WebView mWebView;
 
 	    /** Instantiate the interface and set the context */
-	    WebViewInterface(Context c) {
+	    WebViewInterface(Context c, WebView w) {
 	        mContext = c;
+			mWebView = w;
 	    }
 
 	    /*
 	     * Uncomment if compiling for Android 4.2
 	     * @JavascriptInterface
 	     */
-	    public void updateNames(String namesJsonString) {
+		@JavascriptInterface
+	    public void getMAdID(String namesJsonString) {
 	    	Log.d(getPackageName(), "Sent from webview: " + namesJsonString);
 	    	try {
-				
-	    		JSONObject namesJson = new JSONObject(namesJsonString);
-				final String firstName = namesJson.getString("fname");  
-				final String lastName = namesJson.getString("lname");  
+	    		//JSONObject namesJson = new JSONObject(namesJsonString);
+				//final String firstName = namesJson.getString("fname");
+				//final String lastName = namesJson.getString("lname");
 
 				// When invoked from Javascript this is executed on a thread other than the UI thread
 				// Since we want to update the native UI controls we must create a runnable for the main UI thread.
+				final JSONObject dataJson = new JSONObject();
+				dataJson.put("madid", "12345678");
+
 		    	runOnUiThread(new Runnable() {
 		            public void run() {
-		            	fnameEditText.setText(firstName);
-		            	lnameEditText.setText(lastName);
+		        //    	fnameEditText.setText(firstName);
+		        //    	lnameEditText.setText(lastName);
+						mWebView.loadUrl("javascript:window.setPixelAdvancedMatchingInfo(" + dataJson.toString() + ")");
 		            }
 		        });
 
 	    	} catch (JSONException e) {
 				Log.e(getPackageName(), "Failed to create JSON object from web view data");
 			}
-	    	
+
 	    }
-	    
+
 	}
 
 }
